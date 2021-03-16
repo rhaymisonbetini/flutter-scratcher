@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:scratcher/scratcher.dart';
 
@@ -7,7 +9,20 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home> {
-  Future<void> scratchCardDialog(context) {
+  double _opacity = 0.0;
+  String sort = '0';
+  List<String> primeium = [
+    "Ops, não foi desta vez!",
+    "Tente novamente Campeão",
+    "Quem sabe na próxima",
+    "R\$: 15,00",
+    "R\$: 10,00",
+    "R\$:  5,00"
+  ];
+
+  Future scratchCardDialog(context) async {
+    this.sort = this.primeium[Random().nextInt(this.primeium.length)];
+
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -18,24 +33,50 @@ class _Home extends State<Home> {
           title: Align(
             alignment: Alignment.center,
             child: Text(
-              'Parabéns, Você possui um card premiado',
+              'Raspadinha premiada!',
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
+                color: Colors.blue,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          content: Scratcher(
-            brushSize: 30,
-            threshold: 50,
-            color: Colors.red,
-            onChange: (value) => print("Scratch progress: $value%"),
-            onThreshold: () => print("Threshold reached, you won!"),
-            child: Container(
-              height: 300,
-              width: 300,
-              color: Colors.blue,
-            ),
+          content: StatefulBuilder(
+            builder: (context, StateSetter setState) {
+              return Scratcher(
+                accuracy: ScratchAccuracy.low,
+                brushSize: 40,
+                threshold: 50,
+                onChange: (value) => print("Scratch progress: $value%"),
+                onThreshold: () => {
+                  setState(() => {_opacity = 1})
+                },
+                // image: Image.asset(
+                //   'assets/ticket.png',
+                //   fit: BoxFit.fill,
+                //   width: 300,
+                //   height: 300,
+                //   filterQuality: FilterQuality.low,
+                // ),
+                color: Colors.blue,
+                child: AnimatedOpacity(
+                  duration: Duration(milliseconds: 250),
+                  opacity: _opacity,
+                  child: Container(
+                    height: 300,
+                    width: 300,
+                    alignment: Alignment.center,
+                    child: Text(
+                      sort,
+                      style: TextStyle(
+                          fontSize: 50,
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         );
       },
@@ -45,21 +86,21 @@ class _Home extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: Colors.white,
       alignment: Alignment.center,
       // ignore: deprecated_member_use
       child: FlatButton(
         padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         shape: OutlineInputBorder(
             borderRadius: BorderRadius.circular(35),
-            borderSide: BorderSide(color: Colors.white, width: 2)),
+            borderSide: BorderSide(color: Colors.blueAccent, width: 2)),
         color: Colors.blue,
         child: Text(
           "Você possui uma nova raspadinha!",
           style: TextStyle(color: Colors.white),
         ),
-        onPressed: () {},
+        onPressed: () => scratchCardDialog(context),
       ),
-      color: Colors.blue,
     );
   }
 }
